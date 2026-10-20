@@ -1,5 +1,9 @@
 const reservingStatuses = new Set(['PENDING', 'APPROVED', 'BORROWED']);
 
+function localDateString(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 export function formatDate(dateString) {
   if (!dateString) return 'Not set';
   return new Intl.DateTimeFormat(undefined, {
@@ -13,7 +17,7 @@ export function isDateRangeValid(startDate, endDate) {
   return Boolean(startDate && endDate && startDate <= endDate);
 }
 
-export function isOverdue(request, today = new Date().toISOString().slice(0, 10)) {
+export function isOverdue(request, today = localDateString()) {
   return request.late === true || (request.status === 'BORROWED' && request.endDate < today);
 }
 

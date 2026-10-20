@@ -37,7 +37,7 @@ Static starter records come from `src/data/seed.js`. Changes are saved as JSON u
 
 - `src/App.jsx` owns the local demo state and connects student and staff workflows.
 - `src/components/` contains the catalog, request list, staff transaction desk, and reusable status controls.
-- `src/data/seed.js` contains deterministic demo records.
+- `src/data/seed.js` contains sample records with dates relative to the current day.
 - `src/utils/equipmentUtils.js` contains date availability, eligibility, inventory, and pickup-code helpers.
 - `src/utils/storage.js` loads, saves, and resets browser demo data and reports storage errors.
 - `src/styles.css` contains the responsive page styles.
