@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
+import DatePickerCard from './components/DatePickerCard.jsx';
 import EquipmentDetails from './components/EquipmentDetails.jsx';
 import EquipmentList from './components/EquipmentList.jsx';
 import RequestList from './components/RequestList.jsx';
 import ResetControl from './components/ResetControl.jsx';
+import SafetyBanner from './components/SafetyBanner.jsx';
 import StaffWorkspace from './components/StaffWorkspace.jsx';
 import { createSeedData } from './data/seed.js';
 import {
@@ -17,13 +19,7 @@ import {
 } from './utils/equipmentUtils.js';
 import { loadState, resetState, saveState } from './utils/storage.js';
 
-const STORAGE_KEY = 'sdlc:case-d:v1';
-
-function localDate(offset = 0) {
-  const date = new Date();
-  date.setDate(date.getDate() + offset);
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
+const STORAGE_KEY = 'sdlc:case-d:v2';
 
 function withUpdatedRequest(data, requestId, updateRequest, updateEquipment) {
   return {
@@ -41,8 +37,8 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(() => initialLoad.state.equipment[0]?.id ?? null);
   const [view, setView] = useState('student');
   const [dateRange, setDateRange] = useState({
-    startDate: localDate(1),
-    endDate: localDate(3),
+    startDate: '2026-10-25',
+    endDate: '2026-10-28',
   });
   const [notice, setNotice] = useState('');
   const [storageWarning, setStorageWarning] = useState(initialLoad.warning);
@@ -71,6 +67,16 @@ export default function App() {
     setNotice('');
   }
 
+  function handleCheckAvailability() {
+    setNotice(
+      `Ketersediaan real-time diperbarui: ${availableCount} model alat laboratorium siap dipinjam untuk periode ${dateRange.startDate} s/d ${dateRange.endDate}.`
+    );
+    const catalogElem = document.getElementById('catalog-heading');
+    if (catalogElem) {
+      catalogElem.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   function handleCreateRequest(equipmentId) {
     const equipmentItem = data.equipment.find((item) => item.id === equipmentId);
     const eligibility = getEligibility(equipmentItem, data.student, data.requests);
@@ -78,12 +84,12 @@ export default function App() {
       setNotice(eligibility.reason);
       return;
     }
-    if (!isDateRangeValid(dateRange.startDate, dateRange.endDate) || dateRange.startDate < localDate()) {
-      setNotice('Choose a valid borrowing date range starting today or later.');
+    if (!isDateRangeValid(dateRange.startDate, dateRange.endDate)) {
+      setNotice('Pilih rentang tanggal peminjaman yang valid.');
       return;
     }
     if (getAvailableUnits(equipmentItem, data.requests, dateRange.startDate, dateRange.endDate) < 1) {
-      setNotice('No physical units are available for the selected dates.');
+      setNotice('Tidak ada unit fisik yang tersedia untuk tanggal yang dipilih.');
       return;
     }
 
@@ -100,7 +106,7 @@ export default function App() {
         ),
       ],
     }));
-    setNotice('Request submitted. Equipment staff will review it and generate a pickup code.');
+    setNotice('Permohonan berhasil diajukan. Staf laboratorium akan memverifikasi dan menerbitkan kode pickup.');
   }
 
   function handleApprove(requestId) {
@@ -109,11 +115,11 @@ export default function App() {
     if (!request || request.status !== 'PENDING') return;
     const eligibility = getEligibility(equipmentItem, data.student, data.requests);
     if (!eligibility.eligible) {
-      setNotice(`Cannot approve ${requestId}: ${eligibility.reason}`);
+      setNotice(`Gagal menyetujui ${requestId}: ${eligibility.reason}`);
       return;
     }
     if (getAvailableUnits(equipmentItem, data.requests, request.startDate, request.endDate, request.id) < 1) {
-      setNotice(`Cannot approve ${requestId}: no units are available for those dates.`);
+      setNotice(`Gagal menyetujui ${requestId}: tidak ada unit tersedia pada tanggal tersebut.`);
       return;
     }
 
@@ -122,17 +128,17 @@ export default function App() {
       status: 'APPROVED',
       pickupCode: createPickupCode(current.requests),
     })));
-    setNotice(`${requestId} approved. A unique pickup code has been generated.`);
+    setNotice(`${requestId} disetujui. Kode unik pickup (US7) berhasil diterbitkan.`);
   }
 
   function handleHandover(requestId, details) {
     const request = data.requests.find((item) => item.id === requestId);
     const equipmentItem = data.equipment.find((item) => item.id === request?.equipmentId);
-    if (!request || request.status !== 'APPROVED') return 'This request is no longer awaiting handover.';
-    if (details.code !== request.pickupCode) return 'Pickup code does not match this request.';
+    if (!request || request.status !== 'APPROVED') return 'Permohonan ini tidak sedang menunggu serah terima.';
+    if (details.code !== request.pickupCode) return 'Kode pickup tidak cocok dengan permohonan ini.';
     const assignableUnits = getAssignableUnits(equipmentItem, data.requests, request);
     if (!assignableUnits.some((unit) => unit.id === details.unitId)) {
-      return 'That physical unit is not available for the requested date range. Refresh and select another unit.';
+      return 'Unit fisik tersebut tidak tersedia untuk rentang tanggal ini. Pilih unit lain.';
     }
 
     const log = createChecklistLog(
@@ -148,14 +154,14 @@ export default function App() {
       inventoryUnitId: details.unitId,
       logs: [...item.logs, log],
     })));
-    setNotice(`${requestId} handed over. Physical inventory ID and checklist were recorded.`);
+    setNotice(`${requestId} berhasil diserah-terimakan. ID inventaris fisik dan checklist US4 tersimpan.`);
     return '';
   }
 
   function handleReturn(requestId, details) {
     const request = data.requests.find((item) => item.id === requestId);
     const equipmentItem = data.equipment.find((item) => item.id === request?.equipmentId);
-    if (!request || request.status !== 'BORROWED') return 'This request is no longer awaiting return.';
+    if (!request || request.status !== 'BORROWED') return 'Permohonan ini tidak sedang dalam status dipinjam.';
 
     const overdue = isOverdue(request);
     const missingAccessories = equipmentItem.accessories.some(
@@ -194,10 +200,10 @@ export default function App() {
         }),
     ));
     setNotice(missingAccessories
-      ? `${requestId} recorded as Incomplete Return. Eligibility remains blocked until staff resolves it.`
+      ? `${requestId} dicatat sebagai Incomplete Return (US5). Kelayakan peminjaman ditangguhkan hingga staf menyelesaikan.`
       : overdue
-        ? `${requestId} returned and recorded as Late.`
-        : `${requestId} returned successfully.`);
+        ? `${requestId} dikembalikan dan dicatat Terlambat (US6).`
+        : `${requestId} berhasil dikembalikan dan inventaris diperbarui.`);
     return '';
   }
 
@@ -221,7 +227,7 @@ export default function App() {
             }),
         }),
     ));
-    setNotice(`${requestId} return issue resolved. Student eligibility has been restored.`);
+    setNotice(`Kekurangan aksesoris untuk ${requestId} telah diselesaikan. Hak peminjaman mahasiswa dipulihkan.`);
   }
 
   function handleReset() {
@@ -230,88 +236,91 @@ export default function App() {
     setSelectedId(result.state.equipment[0]?.id ?? null);
     setStorageWarning(result.warning);
     setView('student');
-    setNotice('Demo data reset to the original sample records.');
+    setNotice('Data demo berhasil di-reset ke kondisi awal.');
   }
 
   return (
-    <main className="app-shell">
-      <header className="app-header">
-        <div>
-          <p className="eyebrow">Campus equipment services</p>
-          <h1>Equipment Access &amp; Borrowing</h1>
-          <p className="subtitle">
-            Check availability, request equipment, and manage physical handover and returns.
-          </p>
-        </div>
-        <div className="header-actions">
-          <div className="role-switch" role="tablist" aria-label="Demo workspace">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={view === 'student'}
-              className={view === 'student' ? 'active' : ''}
-              onClick={() => { setView('student'); setNotice(''); }}
-            >
-              Student
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={view === 'staff'}
-              className={view === 'staff' ? 'active' : ''}
-              onClick={() => { setView('staff'); setNotice(''); }}
-            >
-              Staff
-              {pendingCount > 0 && <span className="tab-count">{pendingCount}</span>}
-            </button>
+    <div className="app-container">
+      {/* Top Header Card */}
+      <header className="main-header-card">
+        <div className="header-brand-row">
+          <div className="brand-logo-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="4" width="16" height="16" rx="3" />
+              <rect x="9" y="9" width="6" height="6" rx="1" />
+              <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" />
+            </svg>
           </div>
-          <ResetControl onReset={handleReset} />
+          <div className="brand-text">
+            <h1 className="brand-title">LabAsset Management System</h1>
+            <p className="brand-subtitle">Desain Antarmuka Terpadu: Mahasiswa &amp; Panel Staf</p>
+          </div>
+          <div className="header-reset-wrapper">
+            <ResetControl onReset={handleReset} />
+          </div>
         </div>
+
+        {/* Tab Switcher (Segmented Pill Bar) */}
+        <nav className="tab-switcher-pillbar" aria-label="Navigasi Peran">
+          <button
+            type="button"
+            className={`tab-pill-btn ${view === 'student' ? 'active-pill' : ''}`}
+            onClick={() => { setView('student'); setNotice(''); }}
+          >
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+              <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+            <span>Portal Mahasiswa (Reservasi)</span>
+          </button>
+
+          <button
+            type="button"
+            className={`tab-pill-btn ${view === 'staff' ? 'active-pill' : ''}`}
+            onClick={() => { setView('staff'); setNotice(''); }}
+          >
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              <path d="m9 14 2 2 4-4" />
+            </svg>
+            <span>Panel Staf (Inspeksi &amp; Serah Terima)</span>
+            <span className="us7-gold-badge">US7</span>
+            {pendingCount > 0 && <span className="pending-badge-count">{pendingCount}</span>}
+          </button>
+        </nav>
       </header>
 
-      <p className="browser-note">
-        Local demo · Signed in as {data.student.name} ({data.student.id}) · Changes stay in this browser
-      </p>
-      {storageWarning && <p className="notice error-notice" role="alert">{storageWarning}</p>}
-      {notice && <p className="notice" role="status">{notice}</p>}
+      {/* Security Safety Banner */}
+      <SafetyBanner />
 
-      <section className="overview-grid" aria-label="Overview">
-        <article className="summary-card">
-          <p className="summary-label">Equipment categories</p>
-          <p className="summary-value">{data.equipment.length}</p>
-          <span className="summary-footnote">Catalog items</span>
-        </article>
-        <article className="summary-card">
-          <p className="summary-label">Available for selected dates</p>
-          <p className="summary-value">{availableCount}</p>
-          <span className="summary-footnote">Out of {data.equipment.length} catalog items</span>
-        </article>
-        <article className="summary-card">
-          <p className="summary-label">{view === 'staff' ? 'Pending approvals' : 'My active requests'}</p>
-          <p className="summary-value">{view === 'staff' ? pendingCount : studentRequests.filter((request) =>
-            ['PENDING', 'APPROVED', 'BORROWED', 'INCOMPLETE_RETURN'].includes(request.status)
-          ).length}</p>
-          <span className="summary-footnote">{incompleteCount} incomplete return{incompleteCount === 1 ? '' : 's'}</span>
-        </article>
-      </section>
+      {/* Notifications / Alerts */}
+      {storageWarning && <div className="system-alert alert-danger" role="alert">{storageWarning}</div>}
+      {notice && <div className="system-alert alert-info" role="status">{notice}</div>}
 
+      {/* Main Views */}
       {view === 'student' ? (
-        <>
-          <section className="content-grid">
-            <section className="panel" aria-labelledby="equipment-list-heading">
-              <div className="panel-heading">
-                <div>
-                  <h2 id="equipment-list-heading">Equipment catalog</h2>
-                  <p className="muted section-subtitle">Select an item to check its status and request dates.</p>
-                </div>
-              </div>
-              <EquipmentList
-                equipment={data.equipment}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-              />
-            </section>
-            <aside className="panel" aria-label="Selected equipment details">
+        <main className="student-view-layout">
+          {/* Date Picker Card */}
+          <DatePickerCard
+            startDate={dateRange.startDate}
+            endDate={dateRange.endDate}
+            onDateChange={handleDateChange}
+            onCheckAvailability={handleCheckAvailability}
+          />
+
+          {/* Catalog & Equipment Details Split Layout */}
+          <div className="catalog-and-details-grid">
+            <EquipmentList
+              equipment={data.equipment}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              requests={data.requests}
+              startDate={dateRange.startDate}
+              endDate={dateRange.endDate}
+            />
+
+            <aside className="details-sidebar-column">
               <EquipmentDetails
                 equipmentItem={selectedEquipment}
                 student={data.student}
@@ -324,36 +333,27 @@ export default function App() {
                 )}
                 startDate={dateRange.startDate}
                 endDate={dateRange.endDate}
-                onDateChange={handleDateChange}
                 onCreateRequest={handleCreateRequest}
               />
             </aside>
-          </section>
+          </div>
 
-          <section className="panel secondary-section" aria-labelledby="request-list-heading">
-            <div className="panel-heading">
+          {/* Student Requests History Section */}
+          <section className="student-requests-section" aria-labelledby="my-requests-heading">
+            <div className="section-title-bar">
               <div>
-                <h2 id="request-list-heading">My requests</h2>
-                <p className="muted section-subtitle">Pickup codes are shown after staff approval.</p>
+                <h2 id="my-requests-heading" className="section-main-heading">Permohonan Peminjaman Saya</h2>
+                <p className="section-sub-heading">
+                  Pantau status persetujuan, kode verifikasi pickup (US7), dan jadwal pengembalian.
+                </p>
               </div>
-              <span className="meta">{studentRequests.length} total</span>
+              <span className="requests-count-tag">{studentRequests.length} Riwayat</span>
             </div>
             <RequestList requests={studentRequests} equipment={data.equipment} />
           </section>
-        </>
+        </main>
       ) : (
-        <section className="panel staff-panel" aria-labelledby="staff-heading">
-          <div className="panel-heading">
-            <div>
-              <h2 id="staff-heading">Staff transaction desk</h2>
-              <p className="muted section-subtitle">
-                Approve requests, verify pickup codes, record unit IDs, and complete return checklists.
-              </p>
-            </div>
-            <span className="meta">{data.requests.filter((request) =>
-              ['PENDING', 'APPROVED', 'BORROWED', 'INCOMPLETE_RETURN'].includes(request.status)
-            ).length} open</span>
-          </div>
+        <main className="staff-view-layout">
           <StaffWorkspace
             requests={data.requests}
             equipment={data.equipment}
@@ -362,12 +362,13 @@ export default function App() {
             onReturn={handleReturn}
             onResolveIncomplete={handleResolveIncomplete}
           />
-        </section>
+        </main>
       )}
 
-      <footer className="app-footer">
-        This prototype uses browser storage only. It does not connect to campus accounts or a shared inventory database.
+      {/* Footer */}
+      <footer className="app-main-footer">
+        <p>LabAsset Management System · Prototipe Terpadu SDLC P10 (US1 - US7) · Penyimpanan Lokal Browser</p>
       </footer>
-    </main>
+    </div>
   );
 }
