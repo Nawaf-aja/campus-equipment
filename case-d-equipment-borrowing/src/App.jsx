@@ -15,6 +15,7 @@ const STORAGE_KEY = 'sdlc:case-d:v1';
 export default function App() {
   const [data, setData] = useState(() => loadState(STORAGE_KEY, createSeedData));
   const [selectedId, setSelectedId] = useState(() => data.equipment[0]?.id ?? null);
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
     saveState(STORAGE_KEY, data);
@@ -45,6 +46,24 @@ export default function App() {
     const freshData = resetState(STORAGE_KEY, createSeedData);
     setData(freshData);
     setSelectedId(freshData.equipment[0]?.id ?? null);
+    setNotice('');
+  }
+
+  function handleSaveChecklist(requestId, handoverChecklist) {
+    const updatedData = {
+      ...data,
+      requests: data.requests.map((request) => (
+        request.id === requestId ? { ...request, handoverChecklist } : request
+      )),
+    };
+
+    if (!saveState(STORAGE_KEY, updatedData)) {
+      setNotice('Checklist gagal disimpan. Periksa penyimpanan browser lalu coba lagi.');
+      return;
+    }
+
+    setData(updatedData);
+    setNotice(`Checklist serah terima untuk ${requestId} berhasil disimpan.`);
   }
 
   return (
@@ -61,6 +80,7 @@ export default function App() {
       </header>
 
       <p className="browser-note">Demo data is saved in this browser only.</p>
+      {notice && <p className="checklist-notice" role="status">{notice}</p>}
 
       <section className="overview-grid" aria-label="Overview">
         <article className="summary-card">
@@ -95,7 +115,11 @@ export default function App() {
           <h2 id="request-list-heading">Demo Requests</h2>
           <span className="meta">{data.requests.length} total</span>
         </div>
-        <RequestList requests={data.requests} equipment={data.equipment} />
+        <RequestList
+          requests={data.requests}
+          equipment={data.equipment}
+          onSaveChecklist={handleSaveChecklist}
+        />
       </section>
     </main>
   );
