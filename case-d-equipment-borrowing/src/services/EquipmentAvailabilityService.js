@@ -1,4 +1,5 @@
 import { DateRange } from '../models/DateRange.js';
+import { evaluateBorrowEligibility } from '../utils/equipmentUtils.js';
 
 export class EquipmentAvailabilityService {
   /**
@@ -21,7 +22,7 @@ export class EquipmentAvailabilityService {
       throw new Error('Pilih rentang tanggal yang valid (tanggal mulai harus sebelum atau sama dengan tanggal selesai).');
     }
 
-    const { equipment, requests } = this.repository.findAll();
+    const { equipment, requests, student } = this.repository.findAll();
 
     // US1 Poin 3: Integrasikan filter agar alat berstatus Maintenance dan In Inspection tidak muncul
     const safetyApprovedList = equipment.filter((item) => item.passesSafetyFilter());
@@ -29,18 +30,28 @@ export class EquipmentAvailabilityService {
     // Hitung ketersediaan unit untuk masing-masing model alat
     const catalog = safetyApprovedList.map((item) => {
       const availableUnits = item.calculateAvailableUnits(dateRange, requests);
+      const eligibility = evaluateBorrowEligibility(student, item, requests);
+
       return {
-        id: item.id,
-        name: item.name,
-        model: item.model,
-        lab: item.lab,
-        category: item.category,
-        description: item.description,
-        requiresTraining: item.requiresTraining,
-        accessories: item.accessories,
-        unitsCount: item.getSafetyApprovedUnits().length,
+        item: {
+          id: item.id,
+          name: item.name,
+          model: item.model,
+          lab: item.lab,
+          category: item.category,
+          description: item.description,
+          requiresTraining: item.requiresTraining,
+          accessories: item.accessories,
+          unitsCount: item.getSafetyApprovedUnits().length,
+        },
         availableUnits,
         isReady: availableUnits > 0,
+        eligibility: {
+          eligible: eligibility.eligible,
+          reasons: eligibility.reasons,
+          hasTrainingRequirement: eligibility.hasTrainingRequirement,
+          hasIncompleteReturn: eligibility.hasIncompleteReturn,
+        },
       };
     });
 

@@ -1,3 +1,5 @@
+import { evaluateBorrowEligibility } from '../utils/equipmentUtils.js';
+
 function formatDisplayDate(isoDate) {
   if (!isoDate) return '-';
   const [year, month, day] = isoDate.split('-');
@@ -10,6 +12,8 @@ export default function EquipmentDetails({
   startDate,
   endDate,
   onCreateRequest,
+  student = null,
+  requests = [],
 }) {
   if (!equipmentItem) {
     return (
@@ -19,7 +23,13 @@ export default function EquipmentDetails({
     );
   }
 
-  const canRequest = availableUnits > 0;
+  const eligibility = evaluateBorrowEligibility(student, equipmentItem, requests);
+  const canRequest = availableUnits > 0 && eligibility.eligible;
+  const requestButtonText = !availableUnits
+    ? 'Unit Penuh pada Rentang Ini'
+    : !eligibility.eligible
+      ? 'Kelayakan Belum Memenuhi Syarat'
+      : 'Ajukan Peminjaman Sekarang';
 
   return (
     <div className="equipment-details-card" aria-labelledby="equipment-details-title">
@@ -38,6 +48,12 @@ export default function EquipmentDetails({
       </div>
 
       <p className="details-description">{equipmentItem.description}</p>
+
+      {!eligibility.eligible && eligibility.reasons.length > 0 && (
+        <div className="system-alert alert-info" role="alert">
+          {eligibility.reasons.join(' ')}
+        </div>
+      )}
 
       {/* Booking Date Range Summary */}
       <div className="details-date-summary">
@@ -85,7 +101,7 @@ export default function EquipmentDetails({
           <line x1="12" y1="18" x2="12" y2="12" />
           <line x1="9" y1="15" x2="15" y2="15" />
         </svg>
-        {canRequest ? 'Ajukan Peminjaman Sekarang' : 'Unit Penuh pada Rentang Ini'}
+        {requestButtonText}
       </button>
     </div>
   );

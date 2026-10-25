@@ -1,4 +1,5 @@
 import { InventoryUnit } from './InventoryUnit.js';
+import { evaluateBorrowEligibility } from '../utils/equipmentUtils.js';
 
 export class Equipment {
   /**
@@ -71,5 +72,9 @@ export class Equipment {
     }).length;
 
     return Math.max(0, operableAvailableUnits - overlappingCount);
+  }
+
+  isEligibleForBorrow(student, requests = []) {
+    return evaluateBorrowEligibility(student, this, requests).eligible;
   }
 }
