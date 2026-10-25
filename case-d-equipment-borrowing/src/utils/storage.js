@@ -18,35 +18,30 @@ export function loadState(storageKey, createSeedData) {
 
   try {
     const storedValue = localStorage.getItem(storageKey);
-    if (!storedValue) return { state: fallback, warning: '' };
+    if (!storedValue) return fallback;
 
     const parsedValue = JSON.parse(storedValue);
-    if (matchesShape(parsedValue, fallback)) return { state: parsedValue, warning: '' };
-    return { state: fallback, warning: 'Saved demo data was incompatible and has been replaced with fresh sample data.' };
-  } catch (error) {
-    return {
-      state: fallback,
-      warning: `Could not read saved demo data: ${error.message}`,
-    };
+    return matchesShape(parsedValue, fallback) ? parsedValue : fallback;
+  } catch {
+    return fallback;
   }
 }
 
 export function saveState(storageKey, state) {
   try {
     localStorage.setItem(storageKey, JSON.stringify(state));
-    return '';
-  } catch (error) {
-    return `Could not save demo data in this browser: ${error.message}`;
+    return true;
+  } catch {
+    return false;
   }
 }
 
 export function resetState(storageKey, createSeedData) {
-  let warning = '';
   try {
     localStorage.removeItem(storageKey);
-  } catch (error) {
-    warning = `Could not clear saved demo data: ${error.message}`;
+  } catch {
+    // The in-memory reset still works when browser storage is unavailable.
   }
 
-  return { state: createSeedData(), warning };
+  return createSeedData();
 }
