@@ -24,6 +24,7 @@ Open the local address shown by Vite. Run `npm run build` to create a production
 - See total equipment records and how many currently show available units.
 - Create a local demo request when the selected equipment has available units.
 - View seeded and newly added requests with their status.
+- Record the physical inventory unit ID when staff hand over equipment; the selected unit and request are marked as borrowed.
 - See a disabled action when the selected equipment has no available units.
 - Reset all browser demo changes to the original seed data.
 
