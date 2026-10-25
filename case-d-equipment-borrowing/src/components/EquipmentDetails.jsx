@@ -1,4 +1,7 @@
-import { canCreateDemoRequest } from '../utils/equipmentUtils.js';
+import {
+  canCreateDemoRequest,
+  getEquipmentAvailabilityStatus,
+} from '../utils/equipmentUtils.js';
 
 export default function EquipmentDetails({ equipmentItem, onCreateRequest }) {
   if (!equipmentItem) {
@@ -6,6 +9,7 @@ export default function EquipmentDetails({ equipmentItem, onCreateRequest }) {
   }
 
   const canRequest = canCreateDemoRequest(equipmentItem);
+  const status = getEquipmentAvailabilityStatus(equipmentItem);
 
   return (
     <>
@@ -14,8 +18,8 @@ export default function EquipmentDetails({ equipmentItem, onCreateRequest }) {
           <p className="eyebrow">{equipmentItem.id}</p>
           <h2>{equipmentItem.name}</h2>
         </div>
-        <span className={`status-badge ${canRequest ? 'success' : 'neutral'}`}>
-          {canRequest ? 'AVAILABLE' : 'UNAVAILABLE'}
+        <span className={`status-badge ${status === 'AVAILABLE' ? 'success' : 'warning'}`}>
+          {status === 'AVAILABLE' ? 'AVAILABLE' : 'INSPECTION BUFFER'}
         </span>
       </div>
 

@@ -2,6 +2,12 @@ export function canCreateDemoRequest(equipmentItem) {
   return Number(equipmentItem?.availableUnits) > 0;
 }
 
+export function getEquipmentAvailabilityStatus(equipmentItem) {
+  return Number(equipmentItem?.availableUnits) > 0
+    ? 'AVAILABLE'
+    : 'INSPECTION_BUFFER';
+}
+
 export function getEquipmentName(equipment, equipmentId) {
   return equipment.find((item) => item.id === equipmentId)?.name ?? 'Unknown equipment';
 }

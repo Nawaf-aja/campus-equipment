@@ -1,5 +1,8 @@
+import { getEquipmentAvailabilityStatus } from '../utils/equipmentUtils.js';
+
 export default function EquipmentCard({ equipmentItem, isSelected, onSelect }) {
   const unitLabel = equipmentItem.availableUnits === 1 ? 'unit' : 'units';
+  const status = getEquipmentAvailabilityStatus(equipmentItem);
 
   return (
     <button
@@ -13,8 +16,8 @@ export default function EquipmentCard({ equipmentItem, isSelected, onSelect }) {
           <strong>{equipmentItem.name}</strong>
           <span className="meta"> · {equipmentItem.id}</span>
         </span>
-        <span className={`status-badge ${equipmentItem.availableUnits > 0 ? 'success' : 'neutral'}`}>
-          {equipmentItem.availableUnits > 0 ? 'AVAILABLE' : 'UNAVAILABLE'}
+        <span className={`status-badge ${status === 'AVAILABLE' ? 'success' : 'warning'}`}>
+          {status.replaceAll('_', ' ')}
         </span>
       </span>
       <span className="card-footer">
