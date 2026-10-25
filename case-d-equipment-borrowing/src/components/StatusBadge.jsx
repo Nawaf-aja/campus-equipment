@@ -1,15 +1,11 @@
-const successStatuses = new Set(['STORED', 'AVAILABLE', 'DONE', 'READY']);
-const infoStatuses = new Set(['FOUND', 'NEW', 'IN_PROGRESS', 'REQUESTED']);
-const warningStatuses = new Set(['PREPARING']);
+export default function StatusBadge({ status = 'AVAILABLE' }) {
+  const normalized = status.toUpperCase();
+  let tone = 'neutral';
 
-function getTone(status) {
-  if (successStatuses.has(status)) return 'success';
-  if (infoStatuses.has(status)) return 'info';
-  if (warningStatuses.has(status)) return 'warning';
-  return 'neutral';
-}
+  if (['AVAILABLE', 'READY', 'RETURNED'].includes(normalized)) tone = 'success';
+  if (['PENDING', 'REQUESTED', 'APPROVED', 'BORROWED'].includes(normalized)) tone = 'info';
+  if (['MAINTENANCE', 'PREPARING'].includes(normalized)) tone = 'warning';
+  if (['INCOMPLETE_RETURN', 'LATE', 'OUT_OF_SERVICE', 'IN_INSPECTION'].includes(normalized)) tone = 'danger';
 
-export default function StatusBadge({ status }) {
-  const label = status.replaceAll('_', ' ');
-  return <span className={`status-badge ${getTone(status)}`}>{label}</span>;
+  return <span className={`status-badge ${tone}`}>{normalized.replaceAll('_', ' ')}</span>;
 }
