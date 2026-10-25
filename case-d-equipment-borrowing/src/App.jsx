@@ -6,6 +6,7 @@ import RequestList from './components/RequestList.jsx';
 import ResetControl from './components/ResetControl.jsx';
 import SafetyBanner from './components/SafetyBanner.jsx';
 import { equipmentApi } from './api/equipmentApi.js';
+import { evaluateBorrowEligibility } from './utils/equipmentUtils.js';
 
 export default function App() {
   const repository = equipmentApi.getRepository();
@@ -18,6 +19,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [requests, setRequests] = useState(() => repository.findAll().requests);
+  const [student, setStudent] = useState(() => repository.findAll().student);
   const [notice, setNotice] = useState('');
 
   // Panggilan ke API Controller (US1 Poin 2: Cek database ketersediaan)
@@ -68,8 +70,17 @@ export default function App() {
   }
 
   function handleCreateRequest(equipmentId) {
+    const equipment = repository.findAll().equipment.find((item) => item.id === equipmentId);
+    const eligibility = evaluateBorrowEligibility(student, equipment, requests);
+
+    if (!eligibility.eligible) {
+      setNotice(eligibility.reasonSummary || 'Mahasiswa tidak memenuhi kelayakan untuk mengajukan peminjaman ini.');
+      return;
+    }
+
     const newReq = {
       id: `REQ-${String(requests.length + 1).padStart(3, '0')}`,
+      studentId: student?.id,
       equipmentId,
       startDate: dateRange.startDate,
       endDate: dateRange.endDate,
@@ -94,6 +105,7 @@ export default function App() {
   function handleReset() {
     const fresh = repository.reset();
     setRequests(fresh.requests);
+    setStudent(fresh.student);
     fetchAvailability('2026-10-25', '2026-10-28');
     setDateRange({ startDate: '2026-10-25', endDate: '2026-10-28' });
     setNotice('Data laboratorium berhasil di-reset ke kondisi awal.');
@@ -177,6 +189,8 @@ export default function App() {
               startDate={dateRange.startDate}
               endDate={dateRange.endDate}
               onCreateRequest={handleCreateRequest}
+              student={student}
+              requests={requests}
             />
           </aside>
         </div>
