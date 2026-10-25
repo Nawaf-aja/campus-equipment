@@ -19,6 +19,7 @@ export default function RequestList({ requests, equipment }) {
     <div className="requests-cards-stack">
       {requests.map((request) => {
         const item = equipment.find((eq) => eq.id === request.equipmentId);
+        const inventoryUnit = item?.units.find((unit) => unit.id === request.inventoryUnitId);
         return (
           <article key={request.id} className="request-card-row">
             <div className="request-card-main">
@@ -30,6 +31,12 @@ export default function RequestList({ requests, equipment }) {
               {request.startDate && request.endDate && (
                 <p className="request-dates-line">
                   Jadwal: {formatDate(request.startDate)} – {formatDate(request.endDate)}
+                </p>
+              )}
+              {inventoryUnit && (
+                <p className="request-inventory-line">
+                  ID inventaris: <strong>{inventoryUnit.id}</strong>
+                  {inventoryUnit.serialNumber && ` · Nomor seri: ${inventoryUnit.serialNumber}`}
                 </p>
               )}
             </div>

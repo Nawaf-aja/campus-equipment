@@ -15,9 +15,9 @@ export class EquipmentRepository {
    */
   findAll() {
     const raw = loadState(this.storageKey, createSeedData);
-    const equipment = (raw.state?.equipment || []).map((e) => new Equipment(e));
-    const requests = raw.state?.requests || [];
-    const student = raw.state?.student || { id: 'MHS-2024-018', name: 'Alex Morgan', trainingCompleted: true };
+    const equipment = (raw.equipment || []).map((e) => new Equipment(e));
+    const requests = raw.requests || [];
+    const student = raw.student || { id: 'MHS-2024-018', name: 'Alex Morgan', trainingCompleted: true };
     return { equipment, requests, student, warning: raw.warning };
   }
 
@@ -45,9 +45,9 @@ export class EquipmentRepository {
   reset() {
     const result = resetState(this.storageKey, createSeedData);
     return {
-      equipment: result.state.equipment.map((e) => new Equipment(e)),
-      requests: result.state.requests,
-      student: result.state.student,
+      equipment: result.equipment.map((e) => new Equipment(e)),
+      requests: result.requests,
+      student: result.student,
       warning: result.warning,
     };
   }

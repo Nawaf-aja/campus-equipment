@@ -933,6 +933,77 @@ button {
   gap: 6px;
 }
 
+.request-inventory-line {
+  margin: 8px 0 0;
+  color: #475569;
+  font-size: 0.84rem;
+}
+
+.staff-view-layout,
+.handover-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.handover-cards-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.handover-card {
+  padding: 18px 20px;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+}
+
+.handover-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.handover-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  align-items: end;
+  margin-top: 16px;
+}
+
+.handover-controls label {
+  grid-column: 1 / -1;
+  color: var(--text-body);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.handover-controls select {
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--text-main);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.handover-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.handover-no-units {
+  margin: 10px 0 0;
+  color: var(--warning-text);
+  font-size: 0.82rem;
+}
+
 /* Status Badges */
 .status-badge {
   display: inline-flex;

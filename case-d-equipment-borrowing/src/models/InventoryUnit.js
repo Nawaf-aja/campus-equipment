@@ -3,7 +3,7 @@ export class InventoryUnit {
    * @param {Object} data
    * @param {string} data.id
    * @param {string} data.serialNumber
-   * @param {'AVAILABLE'|'MAINTENANCE'|'IN_INSPECTION'|'OUT_OF_SERVICE'} data.status
+   * @param {'AVAILABLE'|'BORROWED'|'MAINTENANCE'|'IN_INSPECTION'|'OUT_OF_SERVICE'} data.status
    * @param {string} data.condition
    */
   constructor({ id, serialNumber, status = 'AVAILABLE', condition = 'Good' }) {

@@ -68,6 +68,7 @@ export class Equipment {
     const overlappingCount = activeRequests.filter((req) => {
       if (req.equipmentId !== this.id) return false;
       if (!['PENDING', 'APPROVED', 'BORROWED', 'REQUESTED'].includes(req.status)) return false;
+      if (req.inventoryUnitId) return false;
       return dateRange.isOverlapping(req.startDate, req.endDate);
     }).length;
 
