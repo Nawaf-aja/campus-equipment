@@ -49,6 +49,12 @@ export function canCreateDemoRequest(equipmentItem, student = null, requests = [
   return evaluateBorrowEligibility(student, equipmentItem, requests).eligible;
 }
 
+export function getEquipmentAvailabilityStatus(equipmentItem) {
+  return Number(equipmentItem?.availableUnits) > 0
+    ? 'AVAILABLE'
+    : 'INSPECTION_BUFFER';
+}
+
 export function getEquipmentName(equipment, equipmentId) {
   return equipment.find((item) => item.id === equipmentId)?.name ?? 'Unknown equipment';
 }

@@ -1,4 +1,7 @@
-import { evaluateBorrowEligibility } from '../utils/equipmentUtils.js';
+import {
+  evaluateBorrowEligibility,
+  getEquipmentAvailabilityStatus,
+} from '../utils/equipmentUtils.js';
 
 function formatDisplayDate(isoDate) {
   if (!isoDate) return '-';
@@ -24,12 +27,14 @@ export default function EquipmentDetails({
   }
 
   const eligibility = evaluateBorrowEligibility(student, equipmentItem, requests);
+  const status = getEquipmentAvailabilityStatus({ availableUnits: Number(availableUnits ?? equipmentItem?.availableUnits ?? 0) });
   const canRequest = availableUnits > 0 && eligibility.eligible;
   const requestButtonText = !availableUnits
     ? 'Unit Penuh pada Rentang Ini'
     : !eligibility.eligible
       ? 'Kelayakan Belum Memenuhi Syarat'
       : 'Ajukan Peminjaman Sekarang';
+  const statusLabel = status === 'AVAILABLE' ? `${availableUnits} UNIT TERSEDIA` : 'INSPECTION BUFFER';
 
   return (
     <div className="equipment-details-card" aria-labelledby="equipment-details-title">
@@ -43,7 +48,7 @@ export default function EquipmentDetails({
           </p>
         </div>
         <span className={`ready-tag ${availableUnits > 0 ? 'tag-ready' : 'tag-unavailable'}`}>
-          {availableUnits > 0 ? `${availableUnits} UNIT TERSEDIA` : 'TIDAK TERSEDIA'}
+          {statusLabel}
         </span>
       </div>
 

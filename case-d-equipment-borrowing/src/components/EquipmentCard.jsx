@@ -1,3 +1,5 @@
+import { getEquipmentAvailabilityStatus } from '../utils/equipmentUtils.js';
+
 function getEquipmentIcon(name = '', category = '') {
   const lower = (name + ' ' + category).toLowerCase();
   if (lower.includes('oscilloscope') || lower.includes('osiloskop')) {
@@ -50,7 +52,9 @@ function getEquipmentIcon(name = '', category = '') {
 }
 
 export default function EquipmentCard({ item, availableUnits, isReady, isSelected, onSelect }) {
-  const unitText = `${availableUnits} Unit Fisik Siap`;
+  const unitText = `${Math.max(0, Number(availableUnits ?? 0))} Unit Fisik Siap`;
+  const status = getEquipmentAvailabilityStatus({ availableUnits: Number(availableUnits ?? item?.availableUnits ?? 0) });
+  const statusLabel = status === 'AVAILABLE' ? 'Ready' : 'Inspection Buffer';
 
   return (
     <div
@@ -74,7 +78,7 @@ export default function EquipmentCard({ item, availableUnits, isReady, isSelecte
         <div className="lab-item-header">
           <h3 className="lab-item-title">{item.name}</h3>
           <span className={`ready-tag ${isReady ? 'tag-ready' : 'tag-unavailable'}`}>
-            {isReady ? 'Ready' : 'Penuh'}
+            {statusLabel}
           </span>
         </div>
 
