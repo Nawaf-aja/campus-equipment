@@ -1,35 +1,60 @@
-import { getEquipmentName } from '../utils/equipmentUtils.js';
 import HandoverChecklist from './HandoverChecklist.jsx';
 import StatusBadge from './StatusBadge.jsx';
 
-export default function RequestList({ requests, equipment, onSaveChecklist }) {
+function formatDate(dateString) {
+  if (!dateString) return 'Belum ditentukan';
+  const [year, month, day] = dateString.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+export default function RequestList({
+  requests,
+  equipment,
+  checklistResetKey,
+  onSaveChecklist,
+}) {
   if (requests.length === 0) {
-    return <div className="empty-state">No demo requests have been recorded.</div>;
+    return (
+      <div className="empty-requests-box">
+        <p>Belum ada permohonan. Pilih alat pada katalog dan ajukan peminjaman.</p>
+      </div>
+    );
   }
 
   return (
-    <ul className="secondary-list" aria-label="Demo equipment requests">
+    <div className="requests-cards-stack">
       {requests.map((request) => {
-        const equipmentItem = equipment.find((item) => item.id === request.equipmentId);
+        const item = equipment.find((entry) => entry.id === request.equipmentId);
+        const inventoryUnit = item?.units.find((unit) => unit.id === request.inventoryUnitId);
         return (
-          <li className="request-checklist-row" key={request.id}>
-            <div className="secondary-row">
-              <div>
-                <p>
-                  <strong>{getEquipmentName(equipment, request.equipmentId)}</strong>
-                </p>
-                <span className="meta">{request.id}</span>
+          <article key={request.id} className="request-card-row">
+            <div className="request-card-main">
+              <div className="request-header-line">
+                <span className="request-id-badge">{request.id}</span>
+                <StatusBadge status={request.status || 'PENDING'} />
               </div>
-              <StatusBadge status={request.status} />
+              <h3 className="request-equipment-name">{item?.name || request.equipmentId}</h3>
+              {request.startDate && request.endDate && (
+                <p className="request-dates-line">
+                  Jadwal: {formatDate(request.startDate)} – {formatDate(request.endDate)}
+                </p>
+              )}
+              {inventoryUnit && (
+                <p className="request-inventory-line">
+                  ID inventaris: <strong>{inventoryUnit.id}</strong>
+                  {inventoryUnit.serialNumber && ` · Nomor seri: ${inventoryUnit.serialNumber}`}
+                </p>
+              )}
+              <HandoverChecklist
+                key={`${request.id}-${checklistResetKey}`}
+                request={request}
+                accessories={item?.accessories ?? []}
+                onSave={onSaveChecklist}
+              />
             </div>
-            <HandoverChecklist
-              request={request}
-              accessories={equipmentItem?.accessories ?? []}
-              onSave={onSaveChecklist}
-            />
-          </li>
+          </article>
         );
       })}
-    </ul>
+    </div>
   );
 }
