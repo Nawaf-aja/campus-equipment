@@ -26,25 +26,52 @@ export default function RequestList({
       {requests.map((request) => {
         const item = equipment.find((entry) => entry.id === request.equipmentId);
         const inventoryUnit = item?.units.find((unit) => unit.id === request.inventoryUnitId);
+        const isIncomplete = request.status === 'INCOMPLETE_RETURN';
+
         return (
-          <article key={request.id} className="request-card-row">
+          <article key={request.id} className={`request-card-row ${isIncomplete ? 'card-incomplete-return' : ''}`}>
             <div className="request-card-main">
               <div className="request-header-line">
                 <span className="request-id-badge">{request.id}</span>
                 <StatusBadge status={request.status || 'PENDING'} />
               </div>
+
               <h3 className="request-equipment-name">{item?.name || request.equipmentId}</h3>
+
               {request.startDate && request.endDate && (
                 <p className="request-dates-line">
                   Jadwal: {formatDate(request.startDate)} – {formatDate(request.endDate)}
                 </p>
               )}
+
               {inventoryUnit && (
                 <p className="request-inventory-line">
                   ID inventaris: <strong>{inventoryUnit.id}</strong>
                   {inventoryUnit.serialNumber && ` · Nomor seri: ${inventoryUnit.serialNumber}`}
                 </p>
               )}
+
+              {/* US5: Peringatan Incomplete Return pada kartu mahasiswa */}
+              {isIncomplete && (
+                <div className="incomplete-student-warning" role="alert">
+                  <div className="warning-badge-icon">⚠️</div>
+                  <div className="warning-badge-text">
+                    <strong>PENGEMBALIAN TIDAK LENGKAP (US5):</strong>
+                    <p>
+                      Terdapat komponen yang belum diserahkan ke staf lab:{' '}
+                      <strong>
+                        {request.missingAccessories && request.missingAccessories.length > 0
+                          ? request.missingAccessories.join(', ')
+                          : 'Komponen aksesoris bawaan'}
+                      </strong>.
+                    </p>
+                    <p className="lockout-notice">
+                      Penyelesaian pengembalian ditahan dan hak pengajuan alat baru <strong>ditangguhkan</strong> hingga barang dipertanggungjawabkan kepada staf laboratorium.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <HandoverChecklist
                 key={`${request.id}-${checklistResetKey}`}
                 request={request}

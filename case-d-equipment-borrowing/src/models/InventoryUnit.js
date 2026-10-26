@@ -17,6 +17,10 @@ export class InventoryUnit {
     return this.status === 'AVAILABLE';
   }
 
+  isBorrowed() {
+    return this.status === 'BORROWED';
+  }
+
   isUnderMaintenance() {
     return this.status === 'MAINTENANCE';
   }
@@ -31,5 +35,27 @@ export class InventoryUnit {
    */
   passesSafetyFilter() {
     return !this.isUnderMaintenance() && !this.isInInspection();
+  }
+
+  /**
+   * US5: Menandai unit masuk ke status MAINTENANCE karena aksesoris kurang / incomplete return
+   * @param {string} condition
+   */
+  markAsMaintenance(condition = 'Aksesoris kurang (Incomplete Return)') {
+    this.status = 'MAINTENANCE';
+    this.condition = condition;
+  }
+
+  /**
+   * US5: Memulihkan unit kembali ke status AVAILABLE setelah kelengkapan selesai
+   * @param {string} condition
+   */
+  markAsAvailable(condition = 'Good (Lengkap)') {
+    this.status = 'AVAILABLE';
+    this.condition = condition;
+  }
+
+  markAsBorrowed() {
+    this.status = 'BORROWED';
   }
 }

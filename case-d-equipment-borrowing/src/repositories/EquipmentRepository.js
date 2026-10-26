@@ -6,7 +6,7 @@ export class EquipmentRepository {
   /**
    * @param {string} storageKey
    */
-  constructor(storageKey = 'sdlc:case-d:us1') {
+  constructor(storageKey = 'sdlc:case-d:us5') {
     this.storageKey = storageKey;
   }
 

@@ -15,7 +15,7 @@ export const seedEquipment = [
     requiresTraining: true,
     accessories: ['Oscilloscope Unit', 'Passive Probe (4x)', 'Power Cable', 'USB Cable', 'Manual Book'],
     units: [
-      { id: 'UNIT-001', serialNumber: 'OSC-24-001', status: 'AVAILABLE', condition: 'Good' },
+      { id: 'UNIT-001', serialNumber: 'OSC-24-001', status: 'BORROWED', condition: 'Good' },
       { id: 'UNIT-002', serialNumber: 'OSC-24-002', status: 'AVAILABLE', condition: 'Good' },
       { id: 'UNIT-003', serialNumber: 'OSC-24-003', status: 'MAINTENANCE', condition: 'Under maintenance' },
     ],
@@ -73,7 +73,6 @@ export const seedEquipment = [
     requiresTraining: true,
     accessories: ['Analyzer Unit', 'N-to-BNC Adapter', 'Antenna Kit', 'Power Cable'],
     units: [
-      // Alat ini seluruh unitnya Maintenance / In Inspection sehingga otomatis disaring oleh Filter Keamanan (US1 Poin 3)
       { id: 'UNIT-011', serialNumber: 'SPA-24-001', status: 'MAINTENANCE', condition: 'Under maintenance' },
       { id: 'UNIT-012', serialNumber: 'SPA-24-002', status: 'IN_INSPECTION', condition: 'In Inspection' },
     ],
@@ -88,7 +87,6 @@ export const seedEquipment = [
     requiresTraining: false,
     accessories: ['Power Supply Unit', 'Banana-to-Alligator Leads (2x)', 'Power Cable'],
     units: [
-      // Alat ini juga disaring oleh Filter Keamanan
       { id: 'UNIT-013', serialNumber: 'PWR-24-001', status: 'MAINTENANCE', condition: 'Under maintenance' },
       { id: 'UNIT-014', serialNumber: 'PWR-24-002', status: 'IN_INSPECTION', condition: 'In Inspection' },
     ],
@@ -123,6 +121,15 @@ export function createSeedData() {
         startDate: dateFromToday(2),
         endDate: dateFromToday(4),
         status: 'PENDING',
+      },
+      {
+        id: 'REQ-003',
+        studentId: 'MHS-2024-018',
+        equipmentId: 'EQ-001',
+        inventoryUnitId: 'UNIT-001',
+        startDate: dateFromToday(-3),
+        endDate: dateFromToday(1),
+        status: 'BORROWED',
       },
     ],
   };

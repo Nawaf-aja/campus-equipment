@@ -5,6 +5,7 @@ export default function EquipmentList({
   availableCount = 0,
   selectedId,
   onSelect,
+  borrowedEquipmentIds = [],
 }) {
   return (
     <section className="catalog-section" aria-labelledby="catalog-heading">
@@ -37,6 +38,7 @@ export default function EquipmentList({
               isReady={isReady}
               isSelected={item.id === selectedId}
               onSelect={onSelect}
+              isCurrentlyBorrowed={borrowedEquipmentIds.includes(item.id)}
             />
           ))}
         </div>

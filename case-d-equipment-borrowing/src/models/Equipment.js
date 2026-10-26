@@ -78,4 +78,22 @@ export class Equipment {
   isEligibleForBorrow(student, requests = []) {
     return evaluateBorrowEligibility(student, this, requests).eligible;
   }
+
+  /**
+   * US5: Mengetahui aksesoris/komponen apa saja yang kurang saat pengembalian
+   * @param {string[]} returnedAccessories - Komponen yang dicentang oleh staf
+   * @returns {string[]} Daftar komponen yang belum dikembalikan
+   */
+  getMissingAccessories(returnedAccessories = []) {
+    return this.accessories.filter((accessory) => !returnedAccessories.includes(accessory));
+  }
+
+  /**
+   * US5: Memeriksa apakah seluruh komponen dikembalikan lengkap
+   * @param {string[]} returnedAccessories
+   * @returns {boolean}
+   */
+  isReturnComplete(returnedAccessories = []) {
+    return this.getMissingAccessories(returnedAccessories).length === 0;
+  }
 }
