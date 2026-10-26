@@ -7,7 +7,7 @@ const warningStatuses = new Set([
   'IN_INSPECTION',
   'NEEDS_INSPECTION',
 ]);
-const dangerStatuses = new Set(['INCOMPLETE_RETURN', 'LATE', 'OUT_OF_SERVICE']);
+const dangerStatuses = new Set(['INCOMPLETE_RETURN', 'LATE', 'OVERDUE', 'OUT_OF_SERVICE']);
 
 function getTone(status) {
   const normalized = String(status ?? '').toUpperCase();

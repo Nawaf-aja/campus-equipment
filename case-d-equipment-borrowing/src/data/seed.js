@@ -128,7 +128,7 @@ export function createSeedData() {
         equipmentId: 'EQ-001',
         inventoryUnitId: 'UNIT-001',
         startDate: dateFromToday(-3),
-        endDate: dateFromToday(1),
+        endDate: dateFromToday(-1),
         status: 'BORROWED',
       },
     ],

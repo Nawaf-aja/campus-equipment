@@ -1,5 +1,6 @@
 import HandoverChecklist from './HandoverChecklist.jsx';
 import StatusBadge from './StatusBadge.jsx';
+import { getOverdueDays } from '../utils/equipmentUtils.js';
 
 function formatDate(dateString) {
   if (!dateString) return 'Belum ditentukan';
@@ -27,13 +28,18 @@ export default function RequestList({
         const item = equipment.find((entry) => entry.id === request.equipmentId);
         const inventoryUnit = item?.units.find((unit) => unit.id === request.inventoryUnitId);
         const isIncomplete = request.status === 'INCOMPLETE_RETURN';
+        const overdueDays = getOverdueDays(request);
+        const dueDate = request.dueDate ?? request.endDate;
 
         return (
-          <article key={request.id} className={`request-card-row ${isIncomplete ? 'card-incomplete-return' : ''}`}>
+          <article
+            key={request.id}
+            className={`request-card-row ${isIncomplete ? 'card-incomplete-return' : ''} ${overdueDays > 0 ? 'card-overdue-return' : ''}`}
+          >
             <div className="request-card-main">
               <div className="request-header-line">
                 <span className="request-id-badge">{request.id}</span>
-                <StatusBadge status={request.status || 'PENDING'} />
+                <StatusBadge status={overdueDays > 0 ? 'OVERDUE' : request.status || 'PENDING'} />
               </div>
 
               <h3 className="request-equipment-name">{item?.name || request.equipmentId}</h3>
@@ -49,6 +55,16 @@ export default function RequestList({
                   ID inventaris: <strong>{inventoryUnit.id}</strong>
                   {inventoryUnit.serialNumber && ` · Nomor seri: ${inventoryUnit.serialNumber}`}
                 </p>
+              )}
+
+              {overdueDays > 0 && (
+                <div className="overdue-student-warning" role="alert">
+                  <strong>PERINGATAN PENGEMBALIAN TERLAMBAT (US6)</strong>
+                  <p>
+                    Batas pengembalian {formatDate(dueDate)} — terlambat {overdueDays}{' '}
+                    {overdueDays === 1 ? 'hari' : 'hari'}. Harap segera kembalikan alat ke laboratorium.
+                  </p>
+                </div>
               )}
 
               {/* US5: Peringatan Incomplete Return pada kartu mahasiswa */}

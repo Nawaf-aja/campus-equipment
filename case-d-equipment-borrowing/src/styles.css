@@ -1569,6 +1569,30 @@ button {
 }
 
 /* Student Request Card Alert for INCOMPLETE_RETURN */
+.card-overdue-return {
+  border-left: 5px solid #d92d20;
+  background: #fffbfa;
+}
+
+.overdue-student-warning {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px solid #fecdca;
+  border-radius: var(--radius-sm);
+  background: #fef3f2;
+  color: #912018;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.overdue-student-warning strong {
+  color: #b42318;
+}
+
+.overdue-student-warning p {
+  margin: 3px 0 0;
+}
+
 .card-incomplete-return {
   border-left: 5px solid #ef4444;
   background: #fffafa;
