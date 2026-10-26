@@ -42,9 +42,23 @@ const requests = [
   { id: 'REQ-002', equipmentId: 'EQ-004', status: 'REQUESTED' },
 ];
 
+function dateFromToday(offset) {
+  const date = new Date();
+  date.setDate(date.getDate() + offset);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 export function createSeedData() {
   return {
     equipment: equipment.map((item) => ({ ...item })),
-    requests: requests.map((request) => ({ ...request })),
+    requests: [
+      ...requests.map((request) => ({ ...request })),
+      {
+        id: 'REQ-003',
+        equipmentId: 'EQ-001',
+        status: 'BORROWED',
+        dueDate: dateFromToday(-1),
+      },
+    ],
   };
 }

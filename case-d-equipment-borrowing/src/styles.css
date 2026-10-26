@@ -235,6 +235,11 @@ h3 {
   color: #b54708;
 }
 
+.status-badge.danger {
+  background: #fef3f2;
+  color: #b42318;
+}
+
 .status-badge.neutral {
   background: #f2f4f7;
   color: #475467;
@@ -336,12 +341,45 @@ h3 {
   border-bottom: 1px solid #eaecf0;
 }
 
+.secondary-row.overdue-row {
+  padding-left: 12px;
+  border-left: 4px solid #d92d20;
+  border-radius: 4px;
+  background: #fffbfa;
+}
+
 .secondary-row:last-child {
   border-bottom: 0;
 }
 
 .secondary-row p {
   margin-bottom: 3px;
+}
+
+.request-summary {
+  display: grid;
+  gap: 4px;
+}
+
+.request-summary p {
+  margin: 0;
+}
+
+.overdue-warning {
+  display: grid;
+  gap: 3px;
+  margin-top: 7px;
+  padding: 10px 12px;
+  border: 1px solid #fecdca;
+  border-radius: 8px;
+  background: #fef3f2;
+  color: #912018;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.overdue-warning strong {
+  color: #b42318;
 }
 
 .empty-state {
