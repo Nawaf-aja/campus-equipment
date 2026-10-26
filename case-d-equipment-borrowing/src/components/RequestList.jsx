@@ -1,12 +1,18 @@
+import HandoverChecklist from './HandoverChecklist.jsx';
 import StatusBadge from './StatusBadge.jsx';
 
 function formatDate(dateString) {
-  if (!dateString) return 'Not set';
+  if (!dateString) return 'Belum ditentukan';
   const [year, month, day] = dateString.split('-');
   return `${day}/${month}/${year}`;
 }
 
-export default function RequestList({ requests, equipment }) {
+export default function RequestList({
+  requests,
+  equipment,
+  checklistResetKey,
+  onSaveChecklist,
+}) {
   if (requests.length === 0) {
     return (
       <div className="empty-requests-box">
@@ -18,7 +24,7 @@ export default function RequestList({ requests, equipment }) {
   return (
     <div className="requests-cards-stack">
       {requests.map((request) => {
-        const item = equipment.find((eq) => eq.id === request.equipmentId);
+        const item = equipment.find((entry) => entry.id === request.equipmentId);
         const inventoryUnit = item?.units.find((unit) => unit.id === request.inventoryUnitId);
         return (
           <article key={request.id} className="request-card-row">
@@ -39,6 +45,12 @@ export default function RequestList({ requests, equipment }) {
                   {inventoryUnit.serialNumber && ` · Nomor seri: ${inventoryUnit.serialNumber}`}
                 </p>
               )}
+              <HandoverChecklist
+                key={`${request.id}-${checklistResetKey}`}
+                request={request}
+                accessories={item?.accessories ?? []}
+                onSave={onSaveChecklist}
+              />
             </div>
           </article>
         );

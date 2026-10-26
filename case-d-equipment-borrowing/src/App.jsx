@@ -22,6 +22,7 @@ export default function App() {
   const [activeView, setActiveView] = useState('student');
   const [requests, setRequests] = useState(() => repository.findAll().requests);
   const [student, setStudent] = useState(() => repository.findAll().student);
+  const [checklistResetKey, setChecklistResetKey] = useState(0);
   const [notice, setNotice] = useState('');
 
   // Panggilan ke API Controller (US1 Poin 2: Cek database ketersediaan)
@@ -166,9 +167,25 @@ export default function App() {
     const fresh = repository.reset();
     setRequests(fresh.requests);
     setStudent(fresh.student);
+    setChecklistResetKey((current) => current + 1);
     fetchAvailability('2026-10-25', '2026-10-28');
     setDateRange({ startDate: '2026-10-25', endDate: '2026-10-28' });
     setNotice('Data laboratorium berhasil di-reset ke kondisi awal.');
+  }
+
+  function handleSaveChecklist(requestId, handoverChecklist) {
+    const currentData = repository.findAll();
+    const updatedRequests = currentData.requests.map((request) => (
+      request.id === requestId ? { ...request, handoverChecklist } : request
+    ));
+
+    if (!repository.save({ ...currentData, requests: updatedRequests })) {
+      setNotice('Checklist gagal disimpan. Periksa penyimpanan browser lalu coba lagi.');
+      return;
+    }
+
+    setRequests(updatedRequests);
+    setNotice(`Checklist serah terima untuk ${requestId} berhasil disimpan.`);
   }
 
   const catalog = availabilityResult?.catalog || [];
@@ -264,7 +281,6 @@ export default function App() {
             />
           </aside>
         </div>
-
         {/* Riwayat Permohonan */}
         <section className="student-requests-section" aria-labelledby="my-requests-heading">
           <div className="section-title-bar">
@@ -277,6 +293,8 @@ export default function App() {
           <RequestList
             requests={requests}
             equipment={repository.findAll().equipment}
+            checklistResetKey={checklistResetKey}
+            onSaveChecklist={handleSaveChecklist}
           />
         </section>
       </main>
