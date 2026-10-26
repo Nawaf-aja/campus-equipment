@@ -51,7 +51,14 @@ function getEquipmentIcon(name = '', category = '') {
   );
 }
 
-export default function EquipmentCard({ item, availableUnits, isReady, isSelected, onSelect }) {
+export default function EquipmentCard({
+  item,
+  availableUnits,
+  isReady,
+  isSelected,
+  onSelect,
+  isCurrentlyBorrowed = false,
+}) {
   const unitText = `${Math.max(0, Number(availableUnits ?? 0))} Unit Fisik Siap`;
   const status = getEquipmentAvailabilityStatus({ availableUnits: Number(availableUnits ?? item?.availableUnits ?? 0) });
   const statusLabel = status === 'AVAILABLE' ? 'Ready' : 'Inspection Buffer';
@@ -60,7 +67,7 @@ export default function EquipmentCard({ item, availableUnits, isReady, isSelecte
     <div
       role="button"
       tabIndex={0}
-      className={`lab-item-card${isSelected ? ' is-selected' : ''}`}
+      className={`lab-item-card${isSelected ? ' is-selected' : ''}${isCurrentlyBorrowed ? ' is-borrowed-item' : ''}`}
       onClick={() => onSelect(item.id)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -77,9 +84,16 @@ export default function EquipmentCard({ item, availableUnits, isReady, isSelecte
       <div className="lab-item-content">
         <div className="lab-item-header">
           <h3 className="lab-item-title">{item.name}</h3>
-          <span className={`ready-tag ${isReady ? 'tag-ready' : 'tag-unavailable'}`}>
-            {statusLabel}
-          </span>
+          <div className="card-top-badges">
+            {isCurrentlyBorrowed && (
+              <span className="user-borrowed-pill" title="Anda sedang meminjam model alat ini">
+                Sedang Anda Pinjam
+              </span>
+            )}
+            <span className={`ready-tag ${isReady ? 'tag-ready' : 'tag-unavailable'}`}>
+              {statusLabel}
+            </span>
+          </div>
         </div>
 
         <p className="lab-item-subtitle">
